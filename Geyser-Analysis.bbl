@@ -1,0 +1,152 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.5 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \sortlist{nty}{nty}
+    \entry{data}{article}{}
+      \name{author}{2}{}{%
+        {{hash=65e4891f1b92d25dfef449624057228d}{Azzalini}{A\bibinitperiod}{A.}{A\bibinitperiod}{}{}{}{}}%
+        {{hash=780f162f6da88cda528cb452ecc42dcc}{Bowman}{B\bibinitperiod}{A.\bibnamedelimi W.}{A\bibinitperiod\bibinitdelim W\bibinitperiod}{}{}{}{}}%
+      }
+      \list{publisher}{1}{%
+        {[Wiley, Royal Statistical Society]}%
+      }
+      \strng{namehash}{82cc6afbe7e45fab9a92da109078f2f7}
+      \strng{fullhash}{82cc6afbe7e45fab9a92da109078f2f7}
+      \field{sortinit}{A}
+      \field{sortinithash}{b685c7856330eaee22789815b49de9bb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{An analysis of data on the duration times and waiting times for eruptions from the Old Faithful Geyser reveals an interesting time series structure. A tentative physical model, derived from Rinehart, is outlined and a corresponding first-order Markov chain examined. It is shown that a second-order models is necessary to explain the observed correlations in the data. A curious clustering effect is apparent in the autocorrelation function when plotted over a large range of lags. Similar patterns are observed in simulations from the fitted second-order model.}
+      \field{issn}{00359254, 14679876}
+      \field{journaltitle}{Journal of the Royal Statistical Society. Series C (Applied Statistics)}
+      \field{number}{3}
+      \field{title}{A Look at Some Data on the Old Faithful Geyser}
+      \field{volume}{39}
+      \field{year}{1990}
+      \field{pages}{357\bibrangedash 365}
+      \range{pages}{9}
+      \verb{url}
+      \verb http://www.jstor.org/stable/2347385
+      \endverb
+    \endentry
+    \entry{pred}{book}{}
+      \name{author}{2}{}{%
+        {{hash=cb36374bd4d5df832665a44a38c42beb}{Cook}{C\bibinitperiod}{R.\bibnamedelimi D.}{R\bibinitperiod\bibinitdelim D\bibinitperiod}{}{}{}{}}%
+        {{hash=f4aa6cd87cbbbffc1419070e09119937}{Weisberg}{W\bibinitperiod}{S.}{S\bibinitperiod}{}{}{}{}}%
+      }
+      \list{publisher}{2}{%
+        {New York: Chapman}%
+        {Hall}%
+      }
+      \strng{namehash}{37296281552c4eed339eee9431ebb18b}
+      \strng{fullhash}{37296281552c4eed339eee9431ebb18b}
+      \field{sortinit}{C}
+      \field{sortinithash}{59f25d509f3381b07695554a9f35ecb2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Residuals and influence in regression}
+      \field{year}{1982}
+    \endentry
+    \entry{recurrence}{article}{}
+      \name{author}{3}{}{%
+        {{hash=80c57235870ca11eb38252b790f4e1fa}{Eckmann}{E\bibinitperiod}{J.-P.}{J\bibinithyphendelim P\bibinitperiod}{}{}{}{}}%
+        {{hash=c0f6d160771e2b0b1ad3514b7e6b5202}{Kamphorst}{K\bibinitperiod}{S.\bibnamedelimi O.}{S\bibinitperiod\bibinitdelim O\bibinitperiod}{}{}{}{}}%
+        {{hash=01c7105ccc51e52f93c5b05902f722c6}{Ruelle}{R\bibinitperiod}{D.}{D\bibinitperiod}{}{}{}{}}%
+      }
+      \list{publisher}{1}{%
+        {World Scientific}%
+      }
+      \strng{namehash}{2cd97e224538e436ea2f4038ed159e01}
+      \strng{fullhash}{2cd97e224538e436ea2f4038ed159e01}
+      \field{sortinit}{E}
+      \field{sortinithash}{fefc5210ef4721525b2a478df41efcd4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Europhys. Lett}
+      \field{number}{9}
+      \field{title}{Recurrence plots of dynamical systems}
+      \field{volume}{4}
+      \field{year}{1987}
+      \field{pages}{973\bibrangedash 977}
+      \range{pages}{5}
+    \endentry
+    \entry{nm}{article}{}
+      \name{author}{2}{}{%
+        {{hash=f679d2c76561037caf851bc78e48e730}{Nelder}{N\bibinitperiod}{J.\bibnamedelimi A.}{J\bibinitperiod\bibinitdelim A\bibinitperiod}{}{}{}{}}%
+        {{hash=910a207c5358ae3442325672a3c22ade}{Mead}{M\bibinitperiod}{R.}{R\bibinitperiod}{}{}{}{}}%
+      }
+      \list{publisher}{1}{%
+        {British Computer Society}%
+      }
+      \strng{namehash}{84865b0f440e946ff4902ee3db0217ce}
+      \strng{fullhash}{84865b0f440e946ff4902ee3db0217ce}
+      \field{sortinit}{N}
+      \field{sortinithash}{925374ca63e7594de7fafdb83e64d41d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The computer journal}
+      \field{number}{4}
+      \field{title}{A simplex method for function minimization}
+      \field{volume}{7}
+      \field{year}{1965}
+      \field{pages}{308\bibrangedash 313}
+      \range{pages}{6}
+    \endentry
+    \entry{sj}{article}{}
+      \name{author}{2}{}{%
+        {{hash=3c174e2c4a777194a88e5f60cfab7ba3}{Sheather}{S\bibinitperiod}{S.\bibnamedelimi J.}{S\bibinitperiod\bibinitdelim J\bibinitperiod}{}{}{}{}}%
+        {{hash=e6669d921cda9e95637107dd198f274b}{Jones}{J\bibinitperiod}{M.\bibnamedelimi C.}{M\bibinitperiod\bibinitdelim C\bibinitperiod}{}{}{}{}}%
+      }
+      \list{publisher}{1}{%
+        {JSTOR}%
+      }
+      \strng{namehash}{0b2ffa61178ccac5ade4639869ede098}
+      \strng{fullhash}{0b2ffa61178ccac5ade4639869ede098}
+      \field{sortinit}{S}
+      \field{sortinithash}{fd1e7c5ab79596b13dbbb67f8d70fb5a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the Royal Statistical Society. Series B (Methodological)}
+      \field{title}{A reliable data-based bandwidth selection method for kernel density estimation}
+      \field{year}{1991}
+      \field{pages}{683\bibrangedash 690}
+      \range{pages}{8}
+    \endentry
+    \entry{density}{book}{}
+      \name{author}{2}{}{%
+        {{hash=d3daebcf2ec000f4636aa27f778849c3}{Venables}{V\bibinitperiod}{W.\bibnamedelimi N.}{W\bibinitperiod\bibinitdelim N\bibinitperiod}{}{}{}{}}%
+        {{hash=b4407b4a6a08e7dc0bb0845cfeff30a1}{Ripley}{R\bibinitperiod}{B.\bibnamedelimi D.}{B\bibinitperiod\bibinitdelim D\bibinitperiod}{}{}{}{}}%
+      }
+      \list{publisher}{1}{%
+        {Springer Science \& Business Media}%
+      }
+      \strng{namehash}{b930999d8f9d8c29b0d3d8a9557634e2}
+      \strng{fullhash}{b930999d8f9d8c29b0d3d8a9557634e2}
+      \field{sortinit}{V}
+      \field{sortinithash}{d18f5ce25ce0b5ca7f924e3f6c04870e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Modern applied statistics with S-PLUS}
+      \field{year}{2013}
+    \endentry
+  \endsortlist
+\endrefsection
+\endinput
+

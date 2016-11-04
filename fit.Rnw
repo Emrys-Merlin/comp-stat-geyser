@@ -1,0 +1,168 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+% This file contains the fits of the four chosen models.
+
+% 0.) Fit waiting distribution
+% Fit a mixed normal distribution to the distribution of the
+% waiting times (no regard to duration)
+<<dwait1_function>>=
+dwait1 <- function(x,p) {
+  p[1]*dnorm(x, mean = p[2], sd = p[3]) +
+    (1-p[1])*dnorm(x, mean = p[4], sd = p[5])
+}
+dwait1.min <- function(x, p) {
+  e <- dwait1(x,p)
+  if(any(e <= 0)) Inf else -sum(log(e))
+}
+@
+<<dwait1_fit,eval=TRUE>>=
+dwait1.p0 <- c(mean(waiting < 70), 50, 5, 80, 5)
+dwait1.opt <- optim(dwait1.p0, dwait1.min, x = g$waiting[-1])
+dwait1.p1<-dwait1.opt$par
+@
+
+% Fit a mixed normal distribution to the above distribution. The weight
+% now depends logistically on the duration.
+<<dwait2_function>>=
+dwait2 <- function(x,y,p) {
+  q <- exp(p[1] + p[2]*y)
+  q <- q/(1+q)
+  q*dnorm(x, mean = p[3], sd = p[4]) +
+    (1-q)*dnorm(x, mean= p[5], sd = p[6])
+}
+dwait2.min <- function(x,y,p){
+  e <- dwait2(x,y,p)
+  if(any(e <= 0)) Inf else -sum(log(e))
+}
+@
+<<dwait2_fit,eval=TRUE>>=
+dwait2.p0 <- c(log(dwait1.p1[1]/(1-dwait1.p1[1])), 0, dwait1.p1[-1])
+dwait2.opt <- optim(dwait2.p0, dwait2.min, x = g$waiting[-1], 
+                    y = g$duration[-l],
+                    method="L-BFGS-B", upper = rep(Inf, 6),
+                    lower = c(-Inf, -Inf, -Inf, 0, -Inf, 0),
+                    hessian= TRUE)
+dwait2.p1 <- dwait2.opt$par
+@
+
+% 1.) Fit Logistic interpolation
+<<log_wait_fit,eval=TRUE>>=
+log1.wait <- createlog(dwait2.p1[1:2])
+log1.p0 <- dwait2.p1[c(3,5)]
+log1.x <- data.frame(d = g$duration[-l])
+log1.opt <- lossfit(log1.p0, log1.wait, x = log1.x, 
+                    y = g$waiting[-1])
+log1.p1 <- log1.opt$par
+@
+
+% 2.) Fit PLM (dur)
+<<plm1_dur_function>>=
+plm1.dur <- function(x, p) {
+  if(is.atomic(x)) {
+    d <- x
+  } else {
+    d <- x$d
+  }
+  result <- c()
+  for(i in 1:length(d)) {
+    if(x[i] < 3.1) {
+      result <- append(x = result, values = p[1] + p[2]*d[i])
+    } else {
+      result <- append(x = result, values = p[3] + p[4]*d[i])
+    }
+  }
+  result
+}
+@
+<<plm1_dur_fit,eval=TRUE>>=
+plm1.dur <- function(x, p) {
+  if(is.atomic(x)) {
+    d <- x
+  } else {
+    d <- x$d
+  }
+  result <- c()
+  for(i in 1:length(d)) {
+    if(x[i] < 3.1) {
+      result <- append(x = result, values = p[1] + p[2]*d[i])
+    } else {
+      result <- append(x = result, values = p[3] + p[4]*d[i])
+    }
+  }
+  result
+}
+plm1.p0 <- c(30, 10, 30, 10)
+plm1.x <- data.frame(d = g$duration[-l])
+plm1.opt <- lossfit(p0 = plm1.p0, fn = plm1.dur, 
+                    x = plm1.x, y = g$waiting[-1])
+plm1.p1 <- plm1.opt$par
+@
+
+% 3.) Fit LM (dur+wait)
+<<lm1_durwait_function>>=
+lm1.durwait <- function(x,p) {
+  d <- x$d
+  w <- x$w
+  p[1] + p[2]*d + p[3]*w
+}
+@
+<<lm1_durwait_fit,eval=TRUE>>=
+lm1.p0 <- c(30, 10, 0)
+lm1.x <- data.frame(d = g$duration[-l], w = g$waiting[-l])
+lm1.opt <- lossfit(p0 = lm1.p0, fn = lm1.durwait, 
+                   x = lm1.x, y = g$waiting[-1])
+lm1.p1 <- lm1.opt$par
+@
+
+% 4.) Fit PLM (dur+wait)
+<<plm2_durwait_function>>=
+plm2.durwait <- function(x,p) {
+  d <- x$d
+  w <- x$w
+  result <- c()
+  for(i in 1:length(d)) {
+    r <- 0
+    if(d[i] <= dsep) {
+      r <- p[1] + p[2]*d + p[3]*w
+    } else {
+      if(w[i] <= wsep) {
+        r <- p[4] + p[5]*d + p[6]*w
+      } else {
+        r <- p[7] + p[8]*d + p[9]*w
+      }
+    }
+    result <- append(x = result, values = r)
+  }
+  result
+}
+@
+<<plm2_durwait_fit, eval=TRUE>>=
+plm2.p0 <- c(30, 10, 0, 30, 10, 0, 30, 10, 0)
+plm2.x <- lm1.x
+plm2.opt <- lossfit(p0 = plm2.p0, fn = plm2.durwait, x = plm2.x,
+                    y = g$waiting[-1])
+plm2.p1 <- plm2.opt$par
+@
+
+% 5.) Compute Predictive Error (Cross Validation)
+% !!! Evaluation is normally turned of, since it takes quite long. The
+% !!! values are buffered (manually) in the variables in setup.Rnw
+% !!! Last one alone took 45 min to compile.
+<<log1_cv, eval=FALSE>>=
+log1.cv <- losscv(p0 = log1.p0, fn = log1.wait,
+                  x = log1.x, 
+                  y = g$waiting[-1])
+@
+<<plm1_cv, eval=FALSE>>=
+plm1.cv <- losscv(p0 = plm1.p0, fn = plm1.dur, 
+       x = plm1.x , y = g$waiting[-1])
+@
+<<lm1_cv, eval=FALSE>>=
+lm1.cv <- losscv(p0 = lm1.p0, fn = lm1.durwait, 
+       x = lm1.x , y = g$waiting[-1])
+@
+<<plm2_cv, eval=FALSE>>=
+plm2.cv <- losscv(p0 = plm2.p0, fn = plm2.durwait, 
+       x = plm2.x , y = g$waiting[-1])
+@

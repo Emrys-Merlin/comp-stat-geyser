@@ -1,0 +1,26 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+\section{The fit and cross validation routine}
+\label{sec:implementation}
+
+If we are given predictors $x \coloneqq (x_i)_{i=1,\dots,n}$ and regressors $ y \coloneqq (y_i)_{i=1,\dots,n}$ and a model function $f_p$ with parameter(s) $p$. We want to choose the parameter(s) in a manner such that the overall loss of the prediction is minimal. That means we want to solve the minimisation problem
+\[
+\min_p g(p, x, y) \coloneqq \min_p \sum_{i=1}^n \operatorname{loss}(y_i - f_p(x_i)).
+\]
+
+In R this problem takes the following form: The method \texttt{genmin} takes the function $f_p$ and generates the function $g$ we want to minimize over. The method \texttt{lossfit} takes $f_p$ internally generates $g$ and then uses the R intern minimizer \texttt{optim} with the Nelder-Mead-Algorithm (c.f.~\cite{nm}) and initial parameter $p_0$ to estimate the parameter $p$. In code this looks as follows:
+
+<<print_fit, eval=FALSE,echo=TRUE>>=
+<<loss_fit>>
+@
+
+As any numerical optimizer/minimizer, \texttt{optim} only finds local minima and therefore $p$ critically depends on the chosen $p_0$. The method applied to finding $p_0$ is given for each model separately in Appendix~\ref{sec:models}.
+
+The cross validation routine iterates over the regressor predictor pairs, always leaving one out and computing the fit completely analogously to the fit method. Afterwards it uses the parameter to compute the loss of the left out data point. These losses are added up and returned. The code is as follows:
+
+<<print_cv, eval=FALSE,echo=TRUE>>=
+<<loss_cross_validation>>
+@
+
+Again we have the problem of having to choose an initial parameter $p_0$. Therefore we reused the initial parameters of the fit routine.

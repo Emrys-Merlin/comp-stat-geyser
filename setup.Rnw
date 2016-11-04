@@ -1,0 +1,177 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+% concordance = no idea
+% echo: Do not automatically print entered R code
+\SweaveOpts{concordance=TRUE, echo=FALSE}
+
+% Load important libraries
+<<library,results=hide>>=
+library(xtable)
+library(rgl)
+library(fNonlinear, quietly = TRUE)
+@
+
+% Setup variables
+<<variables>>=
+# value of the constant part of the loss function
+q <- 57
+# Separators in the marginal scatter plots
+dsep <- 3.1
+wsep <- 67
+# Used as xrange for plots with duration on x axis.
+xd <- seq(from = 0.8, to = 5.6, by = 0.05)
+# Caching of the Cross validation values, because computation takes so
+# long.
+log1.cv <- 3488.03
+plm1.cv <- 3548.98
+lm1.cv <- 3873.74
+plm2.cv <- 3354.90
+@
+
+% Setup the geyser data structure and colors
+<<data_setup, results=hide>>=
+library(MASS)
+g <- geyser
+attach(g)
+l <- length(g$duration)
+color <-  rep("blue", l)
+color[duration > dsep] <- "green"
+color[waiting < wsep] <- "red"
+@
+
+% Loss function used
+<<loss_function>>=
+loss <- function(x, q){
+  x[x < 0] <- q
+  x
+}
+@
+
+% Official Prediction Function
+<<opred_function>>=
+opred <- function(x){
+  30 + 10*x
+}
+@
+
+% Often used plots
+<<plot_duration, eval=FALSE>>=
+plot(g$duration[-l], g$waiting[-1], col=color,
+     xlab= "Duration", ylab= "Waiting time")
+@
+
+% Fit function using the above defined loss function
+% Internally uses the R optim method
+% Furthermore a helper method that generates for a function fn(x,p) the 
+% counterpart to minimize over.
+<<loss_fit>>=
+# takes a function fn(x,p) and generates a function to minimize over.
+genmin <- function(fn, l = loss, bound = q) {
+  function(p,x,y) {
+    result <- 0
+    if(is.atomic(x)) {
+      for(i in 1:length(y)) {
+        result <- result + l(y[i] - fn(x[i], p), bound)
+      }
+    } else {
+      for(i in 1:length(y)) {
+        result <- result + l(y[i] - fn(x[i,], p), bound)
+      }
+    }
+    #sum(loss(y - fn(x,p), bound))
+    result
+  }
+}
+
+# fitting/minimization taking place here
+# p0: initial parameter
+# x: all predictors (as data.frame)
+# y: the (1d) regressor
+# l: custom loss function
+# bound: bound of the loss function
+lossfit <- function(p0, fn, x, y, l = loss, bound = q){
+  fn.min <- genmin(fn, l = l, bound = bound)
+  optim(p0, fn.min, x = x, y = y)
+}
+@
+
+% Computes the prediction error of our model using cross validation 
+% and a special loss function.
+% Think about adding error handling.
+<<loss_cross_validation>>=
+# p0: initial parameter
+# x: all predictors (as data.frame)
+# y: the (1d) regressor
+# l: custom loss function
+# bound: bound of the loss function
+losscv <- function(p0, fn, x, y, l = loss, bound = q) {
+  fn.min <- genmin(fn, l = l, bound = bound)
+  result <- list(value = 0, warn = c())
+  for(i in 1:length(y)) {
+    o <- optim(p0, fn.min, x = x[-i,], y = y[-i])
+    if (o$convergence != 0) {
+      result$warn <- append(result$warn, values = i)
+    } 
+    result$value <- result$value + fn.min(o$par, x[i,], y[i])
+  }
+  result
+}
+@
+
+% Computes the average misses with this predictive function fn.
+% Does not use predictive error, however. Perhaps change later
+<<total_av_misses>>=
+tmisses <- function(fn, x, y, p) {
+  result <- 0
+  for(i in 1:length(y)) {
+    if(y[i] - fn(x[i,],p) < 0 ) {
+      result <- result + 1
+    }
+  }
+  result
+}
+
+avmisses <- function(fn, x, y, p) {
+  tmisses(fn, x, y, p)/length(y)
+}
+@
+
+% If the predictive function predicts too short, how much longer does
+% one have to wait on average?
+<<av_wait>>=
+avwait <- function(fn, x, y, p) {
+  n <- 0
+  abs <- 0
+  for(i in 1:length(y)) {
+    diff <- y[i] - fn(x[i,],p)
+    if(diff >= 0) {
+      abs <- abs + diff
+      n <- n + 1
+    }
+  }
+
+  if(n == 0) {
+    return(n)
+  } else {
+    return(abs/n)
+  }
+}
+@
+
+% Creates a logistic function that has the two asymptotic levels as 
+% parameters. The "velocity" and "location" of switch will be fixed.
+<<create_log>>=
+createlog <- function(l) {
+  function(x,p) {
+    if(is.atomic(x)) {
+      d <- x
+    } else {
+      d <- x$d
+    }
+    q <- exp(l[1] + l[2]*d)
+    q <- q/(1+q)
+    q*p[1] + (1-q)*p[2]
+  }
+}
+@

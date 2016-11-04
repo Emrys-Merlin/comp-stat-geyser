@@ -1,0 +1,72 @@
+% !TeX program = XeLaTeX
+\documentclass[english,final]{scrartcl}
+
+\usepackage{Sweave}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+
+\usepackage{babel}
+
+\usepackage[english=british]{csquotes}
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{biblio.bib}
+
+\usepackage{fontspec}
+\setmainfont{Linux Libertine O}
+\setsansfont{Linux Biolinum O}
+
+\usepackage{microtype}
+
+\usepackage{siunitx}
+\usepackage{booktabs}
+
+\usepackage[colorlinks=true, linkcolor=blue, pdfborder={0 0 0}]{hyperref}
+
+\usepackage{todonotes}
+\usepackage[left]{showlabels}
+
+\title{An analysis of the Old Faithful Geyser}
+\subtitle{End of term report for the lecture\\Computational Statistics}
+\author{Tim Adler}
+
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\maketitle
+
+%\listoftodos
+
+\SweaveInput{setup.Rnw}
+
+\SweaveInput{introduction.Rnw}
+
+\SweaveInput{description.Rnw}
+
+\SweaveInput{fit.Rnw}
+
+\SweaveInput{model.Rnw}
+
+\newpage
+
+\appendix
+
+\SweaveInput{details.Rnw}
+
+\SweaveInput{recurrence.Rnw}
+
+\SweaveInput{density.Rnw}
+
+\SweaveInput{loss.Rnw}
+
+\SweaveInput{implementation.Rnw}
+
+\SweaveInput{residue.Rnw}
+
+\printbibliography[heading=bibintoc]
+
+\end{document}

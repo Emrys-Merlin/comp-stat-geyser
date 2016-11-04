@@ -1,0 +1,45 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+\section{Descriptive Statistics}
+\label{sec:details}
+
+\subsection{Extended summary}
+\label{sec:summary}
+
+In the following section we describe the geyser data set in more detail. In addtion to what was mentioned in Section~\ref{sec:introduction}, we want to add that we have to keep in mind that waiting time $i$ of the data set denotes the waiting time \emph{before} eruption $i$ occured. Thus waiting time $i$ incorporates duration $i-1$. We could separate the two. However, as can be seen in Table~\ref{tab:summary}, the duration is much smaller than the waiting time such that the effect on the prediction would be negligible.
+
+\begin{table}[htbp]
+\centering
+\sisetup{
+  table-number-alignment = right,
+  table-figures-integer = 3,
+  table-figures-decimal = 2
+}
+\begin{tabular}{r
+S[table-auto-round]
+S[table-auto-round]}
+\toprule
+& {waiting} & {duration}\\
+& {[\si{\minute}]} & {[\si{\minute}]}\\
+\midrule
+Min & \Sexpr{min(waiting)} & \Sexpr{min(duration)}\\
+1st Quantile & \Sexpr{quantile(waiting, 0.25)} & \Sexpr{quantile(duration, 0.25)}\\
+Median & \Sexpr{median(waiting)} & \Sexpr{median(duration)}\\
+Mean & \Sexpr{mean(waiting)} & \Sexpr{mean(duration)}\\
+3rd Quantile & \Sexpr{quantile(waiting, 0.75)} & \Sexpr{quantile(duration, 0.75)}\\
+Max & \Sexpr{max(waiting)} & \Sexpr{max(duration)}\\
+\bottomrule
+\end{tabular}
+\caption{Summary of the geyser data set}
+\label{tab:summary}
+\end{table}
+
+In Figure~\ref{fig:density} we see a 3 dimensional scatter plot of the next waiting time over waiting time and duration. A density estimation has been added and we see, that there are three clouds visible. These correspond exactly to the coloring in Figure~\ref{fig:cluster}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.65\textwidth]{density.png}
+\caption{Three dimensional scatter plot with estimated density. We find three clusters corresponding to the clusters marked in Figure~\ref{fig:cluster}}
+\label{fig:density}
+\end{figure}

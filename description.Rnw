@@ -1,0 +1,28 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+\section{Cluster detection}
+\label{sec:data}
+
+We have two variables, the (last) waiting time and the duration, which we want to use to predict the next waiting time. Figure~\ref{fig:cluster} shows that our data points cluster into three clouds. These clouds are color coded. We see that there is no obvious linear dependence between any of the two plotted relations. The official predictive function just seems to run parallel to the line through the two centers of duration plot clouds.
+\vspace{-0.8cm}
+\begin{figure}[htbp]
+\setkeys{Gin}{width=0.45\textwidth}
+\centering
+<<dur_opred_plot,fig=TRUE>>=
+plot(duration[-l], waiting[-1], xlab = "duration" , ylab = "next waiting time",col=color)
+abline(v=dsep)
+lines(x = xd, y = opred(xd), col = "violet")
+@
+\hspace{1cm}
+<<wait_plot,fig=TRUE, echo=FALSE>>=
+plot(waiting[-l], waiting[-1], xlab = "waiting time", ylab = "next waiting time", col=color)
+abline(v=wsep)
+@
+\caption{Color coded marginal scatter plots with separators and park model.}
+\label{fig:cluster}
+\end{figure}
+
+We separate the three clouds by the two vertical lines depicted in Figure~\ref{fig:cluster}. The duration separator is at \Sexpr{dsep} and the wating time separator is at \Sexpr{wsep}. This is not a perfect seperation as some points of the blue grouping mix with the green grouping and vice versa. Also the exact location of the waiting time split is up to some arbitration. It turns out that this is not a problem, because only one model (and not the best one) uses this separation. There are no other clusters in this data set as can be seen in Figure~\ref{fig:density} in Appendix~\ref{sec:details} on page~\pageref{fig:density}.
+
+Azzalini \& Bowman \cite{data} state a rough physical model for the evolution of the waiting time, which involves a periodic process with period 2. It does not seem likely to us that we have such a simple periodicity. The details can be found in Appendix~\ref{sec:recurrence}.

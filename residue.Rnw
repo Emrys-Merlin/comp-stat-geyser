@@ -1,0 +1,201 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+\section{Model implementation and residues}
+\label{sec:models}
+
+In the following we show the implementation of each of the used models, the residues after the fit, the strategy for obtaining the initial parameters and the values of the estimated parameters.
+
+\subsection{Logistic interpolation with regressor: duration}
+
+This model is just a standard implementation of a logistic function interpolating between two plateaus. The parameters of the exponential function, which determine the transition region and speed are fixed and taken from the fit of the duration dependent waiting time distribution (c.f.\ Appendix~\ref{sec:density}). Thus the implementation takes the form:
+
+<<log1_print>>=
+lg1.wait <- createlog(dwait2.p1[1:2])
+getAnywhere(lg1.wait)
+@
+
+As initial parameters for the plateaus we chose the mean of the two peaks in the waiting time distribution (again, c.f.\ Appendix~\ref{sec:details}). The result is shown in Table~\ref{tab:log1}. The residue of the fit is depicted in Figure~\ref{fig:residue1} (left) on page~\pageref{fig:residue1}. All in all there is not much structure in the residues except for a few outliers which are easily identified with the outliers in the waiting time distribution.
+
+\begin{table}[htbp]
+\centering
+\sisetup{
+  table-number-alignment = right,
+  table-figures-integer = 2,
+  table-figures-decimal = 2
+}
+\begin{tabular}{r
+S[table-auto-round]
+S[table-auto-round]}
+\toprule
+& {Param1} & {Param2}\\
+\midrule
+Initial & \Sexpr{round(log1.p0[1],2)} & \Sexpr{round(log1.p0[2],2)}\\
+Terminal & \Sexpr{round(log1.p1[1],2)} & \Sexpr{round(log1.p1[2],2)}\\
+\bottomrule
+\end{tabular}
+\caption{Parameters of the logistic interpolation model}
+\label{tab:log1}
+\end{table}
+
+\subsection{Piecewise linear model with regressor: duration}
+
+This model is very close to the official predictive model. The only difference is, that it respects the two clusters in the wating time duration plot. Thus we get two linear models, one for each cluster. Implemented this looks as follows:
+
+<<plm1_print, eval=FALSE, echo=TRUE>>=
+<<plm1_dur_function>>
+@
+
+As the model is adapted from the official model. We use the parameters of it as initial parameters for our fit. The result of our regression can be found in Table~\ref{tab:plm1} and the residues are in Figure~\ref{fig:residue1} (right). Again we see almost no structure, except for the same outliers as in the model before.
+
+\begin{table}[htbp]
+\centering
+\sisetup{
+  table-number-alignment = right,
+  table-figures-integer = 2,
+  table-figures-decimal = 2
+}
+\begin{tabular}{r
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]}
+\toprule
+& {Param1} & {Param2} & {Param3} & {Param4}\\
+\midrule
+Initial & \Sexpr{round(plm1.p0[1],2)} & \Sexpr{round(plm1.p0[2],2)}
+  & \Sexpr{round(plm1.p0[3],2)} & \Sexpr{round(plm1.p0[4],2)}\\
+Terminal & \Sexpr{round(plm1.p1[1],2)} & \Sexpr{round(plm1.p1[2],2)}
+  & \Sexpr{round(plm1.p1[3],2)} & \Sexpr{round(plm1.p1[4],2)}\\
+\bottomrule
+\end{tabular}
+\caption{Parameters of the piecwise linear (dur) model}
+\label{tab:plm1}
+\end{table}
+
+
+\begin{figure}[htbp]
+\setkeys{Gin}{width=0.45\textwidth}
+\centering
+<<log1_plot, fig = TRUE>>=
+
+plot(g$waiting[-1] - lg1.wait(g$duration[-l], log1.p1),
+     ylab = "Residue")
+@
+\hspace{1cm}
+<<plm1_plot, fig=TRUE>>=
+plot(g$waiting[-1] - plm1.dur(g$duration[-l], plm1.p1), ylab = "Residue")
+@
+\caption{Residuals of Model 1 (left) and Model 2 (right)}
+\label{fig:residue1}
+\end{figure}
+
+\subsection{Linear model with predictors: duration \& waiting time}
+
+This model is a slight adaption of the official predictive model, too. Instead of taking the clustering into account we add the last waiting time as a regressor. This leads to the following implementation:
+
+<<lm1_print, eval=FALSE, echo=TRUE>>=
+<<lm1_durwait_function>>
+@
+
+Because of the close relation to the park model, we use its parameters as inital parameters. For the waiting time coefficient we use 0 as we suspect it will only act as a small correction. The results can be found in Table~\ref{tab:lm1} and the residues are depicted in Figure~\ref{fig:residue2} on page~\pageref{fig:residue2}. As before, there is almost no structure in the residues, except for the known outliers.
+
+\begin{table}[htbp]
+\centering
+\sisetup{
+  table-number-alignment = right,
+  table-format = -2.2
+}
+\begin{tabular}{r
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]}
+\toprule
+& {Param1} & {Param2} & {Param3} \\
+\midrule
+Initial & \Sexpr{round(lm1.p0[1],2)} & \Sexpr{round(lm1.p0[2],2)}
+  & \Sexpr{round(lm1.p0[3],2)}\\
+Terminal & \Sexpr{round(lm1.p1[1],2)} & \Sexpr{round(lm1.p1[2],2)}
+  & \Sexpr{round(lm1.p1[3],2)}\\
+\bottomrule
+\end{tabular}
+\caption{Parameters of the linear (dur+wait) model}
+\label{tab:lm1}
+\end{table}
+
+\subsection{Piecewise linear model with predictors: duration \& waiting time}
+
+This model is a refinement of the previous one. Again we use duration and waiting time as predictors, yet this time we apply a linear model to each of the three identified clusters separately. This increases the number of parameters to 9 and the code takes the following form:
+
+<<plm2_print, eval=FALSE, echo=TRUE>>=
+<<plm2_durwait_function>>
+@
+
+Because of the close relation to the park model. We use its parameters as inital parameters. For the different waiting times we use 0, as we suspect only a small corrective effect. The result is summarized in Table~\ref{tab:plm2} and the residues can be found in Figure~\ref{fig:residue2} (right). In this case there is a little more structure than in the other cases and we have the same outliers. Additionally we see that we miss more eruptions than in the other models. Together with the high number of necessary parameters, these are indicators against the use of this model.
+
+\begin{table}[htbp]
+\centering
+\sisetup{
+  table-number-alignment = right,
+  table-format = -2.2
+}
+\begin{tabular}{r
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]}
+\toprule
+& {Param1} & {Param2} & {Param3} & {Param4}\\ 
+\midrule
+Initial & \Sexpr{round(plm2.p0[1],2)} & \Sexpr{round(plm2.p0[2],2)}
+  & \Sexpr{round(plm2.p0[3],2)} & \Sexpr{round(plm2.p0[4],2)}\\
+Terminal & \Sexpr{round(plm2.p1[1],2)} & \Sexpr{round(plm2.p1[2],2)}
+  & \Sexpr{round(plm2.p1[3],2)} & \Sexpr{round(plm2.p1[4],2)}\\
+\bottomrule
+\end{tabular}
+\vphantom{h}
+\vspace{0.3cm}
+\vphantom{h}
+\begin{tabular}{S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]}
+\toprule
+{Param5} & {Param6} & {Param7} & {Param8} & {Param9}\\
+\midrule
+\Sexpr{round(plm2.p0[5],2)} & \Sexpr{round(plm2.p0[6],2)}
+  & \Sexpr{round(plm2.p0[7],2)} & \Sexpr{round(plm2.p0[8],2)}
+  & \Sexpr{round(plm2.p0[9],2)}\\
+  \Sexpr{round(plm2.p1[5],2)} & \Sexpr{round(plm2.p1[6],2)}
+  & \Sexpr{round(plm2.p1[7],2)} & \Sexpr{round(plm2.p1[8],2)}
+  & \Sexpr{round(plm2.p1[9],2)}\\
+\bottomrule
+\end{tabular}
+\caption{Parameters of the piecwise linear (dur+wait) model}
+\label{tab:plm2}
+\end{table}
+
+\begin{figure}[htbp]
+\setkeys{Gin}{width=0.45\textwidth}
+\centering
+<<lm1_plot, fig = TRUE>>=
+plot(g$waiting[-1] - lm1.durwait(data.frame(d = g$duration[-l],
+                                         w = g$waiting[-l]), 
+                              lm1.p1), ylab="Residue")
+@
+\hspace{1cm}
+<<plm2_plot, fig=TRUE>>=
+res <- c()
+y <- g$waiting[-1]
+for(i in 1:length(y)) {
+  tmp <- y[i] -  plm2.durwait(list(d = g$duration[i],
+                                   w = g$waiting[i]),
+                              plm2.p1)
+  res <- append(x = res, values = tmp)
+}
+plot(res, ylab = "Residue")
+@
+\caption{Residuals of Model 3 (left) and Model 4 (right)}
+\label{fig:residue2}
+\end{figure}

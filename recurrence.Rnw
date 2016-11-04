@@ -1,0 +1,43 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+\subsection{Periodicity and Recurrence Plots}
+\label{sec:recurrence}
+
+As Azzalini \& Bowman state in \cite{data}, they suspect a rough physical model underlying the eruption pattern of the geyser. One prediction of this model were that the waiting time would have a period of 2, i.e.\ the waiting time would alternate between \enquote{long} and \enquote{short}. Figure~\ref{fig:ts} (left) seems to back this idea. 
+
+\begin{figure}[htbp]
+\setkeys{Gin}{width=0.45\textwidth}
+\centering
+<<plot_wait_period,fig=TRUE>>=
+plot(waiting[1:100], type="l")
+@
+\hspace{1cm}
+<<rec_waiting_plot, fig=TRUE>>=
+# multiply eps with sqrt(m), since squared distance of all three
+# points is considered.
+recurrencePlot(g$waiting, m = 3, d = 1, end.time = 20, eps = 17, nt = 1, pch="o", main = "Waiting time")
+@
+\caption{Left: Extract of the waiting time time series. Right: Extract of the waiting time recurrence plot.}
+\label{fig:ts}
+\end{figure}
+
+To investigate the periodicity of our data set further, we used a recurrence plot as introduced in \cite{recurrence}. Recurrence plots give us a mark at coordinate $(i,j)$ whenever the waiting time at point $i$ is \emph{sufficiently} close to that of $j$. In our case we compared three consecutive data points starting at $i$ with their counterpart at $j$ and wanted them to be closer together than one standard deviation (\Sexpr{round(sd(g$waiting),2)}), which is a rather lenient restriction.
+
+We see in Figure~\ref{fig:ts} (right), that we have basically no recurrences at $(i,i+2)$, which we would expect, if we had a periodicity of two. There are quite a few other recurrences, which is not surprising as our closeness constraint is rather lax, however it seems that all in all the period is either too long or too complex to be taken into account in the further analysis.
+
+\begin{figure}[htbp]
+\setkeys{Gin}{width=0.45\textwidth}
+\centering
+<<plot_wait_period2,fig=TRUE>>=
+plot(waiting, type="l")
+@
+\hspace{1cm}
+<<rec_waiting_plot2, fig=TRUE>>=
+# multiply eps with sqrt(m), since squared distance of all three
+# points is considered.
+recurrencePlot(g$waiting, m = 3, d = 1, end.time = l, eps = 17, nt = 1, pch=".", main = "Waiting time")
+@
+\caption{Left: Full waiting time time series. Right: Full waiting time recurrence plot.}
+\label{fig:ts2}
+\end{figure}

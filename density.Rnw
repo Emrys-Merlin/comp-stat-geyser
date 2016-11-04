@@ -1,0 +1,48 @@
+\subsection{Nonparametric and parametric density estimation}
+\label{sec:density}
+
+Since we want to predict the waiting time it is interesting how the waiting time is distributed overall. For that we utilised a density estimation. We used the \texttt{density} method of R together with the Sheather-Jones-Algorithm(c.f.~\cite{sj}) for Bandwidth gauging. The problem is that we wanted to estimate the overall shape without averaging out important structure. To take this into account we also had a look at estimated densities with a far smaller bandwidth and found that the estimated bandwidth is appropriate for our purpose. The result of the estimation can be found in Figure~\ref{fig:wait} (left, black curve). 
+
+\begin{figure}[htbp]
+\setkeys{Gin}{width=0.45\textwidth}
+\centering
+<<dens_estim, fig = TRUE>>=
+dens.waiting <- density(g$waiting, bw="SJ", n = 512)
+plot(dens.waiting, main = "", xlab = "Waiting time")
+dens.x <- dens.waiting$x
+lines(x = dens.x, y = dwait1(dens.x, dwait1.p1), col = "green")
+legend(x = "topright", legend = c("estim density", "mixed normal"),
+       col = c("black", "green"), lty = c(1,1))
+rug(g$waiting)
+@
+\hspace{1cm}
+<<plot_mn_density2, fig= TRUE>>=
+plot(x = dens.x, y = dwait2(dens.x, 1, dwait2.p1), type="l", xlab = "Waiting time", ylab = "Density")
+lines(x = dens.x, y = dwait2(dens.x, 3, dwait2.p1), type="l", col = "blue")
+lines(x = dens.x, y = dwait2(dens.x, 5, dwait2.p1), type="l", col = "green")
+legend(x = "topright", legend = c("d = 1", "d = 3", "d = 5"), 
+       col = c("black", "blue", "green"), lty = c(1,1,1))
+rug(g$waiting)
+@
+\caption{Density estimation of the Waiting time. Left: Duration independet. Right: Duration dependent.}
+\label{fig:wait}
+\end{figure}
+
+We observe that the distribution is strongly bimodal and from the form we deduce that it should be well described by a mixed normal distribution. We did this approximation (blue curve in Figure~\ref{fig:wait} left) following the procedure described in \cite{density}. Our density candidate is given by
+
+<<dwait1_print, eval=FALSE, echo=TRUE>>=
+<<dwait1_function>>
+@
+
+We minimize \texttt{dwait1.min} using the built in minimizer \texttt{optim} of R. As we see in Figure~\ref{fig:wait} the blue curve is in rather good agreement with the estimated density. However, the left peak is a little off and the overall form of it differs from the nonparametric density.
+
+To remedy this shortcoming we want to introduce (as described in \cite{density}) another parameter and take the duration into account. Looking at Figure~\ref{fig:cluster}, it is clear that the duration has a strong impact on the distribution of the waiting time, so it seems sensible to make the density duration dependent. For this we make the \enquote{mixing coefficent} duration dependent. Since this coefficient has to vary between 0 and 1 it is natural to assume a logistic relation to the duration. Implemented this takes the following form:
+
+<<dwait2_print, eval=FALSE, echo=TRUE>>=
+<<dwait2_function>>
+@
+
+Analogously to \texttt{dwait1} we minimized it using \texttt{optim}. We see that for the one additional parameter we get a minimum of \Sexpr{round(dwait2.opt$value,2)} as compared to \Sexpr{round(dwait1.opt$value,2)} for \texttt{dwait1}. This is a remarkable improvement. In Figure~\ref{fig:wait} (right) the waiting time distribution is plotted at different durations. We see that if the duration time is either very high or very low, the bimodal distribution degenerates to a common normal distribution.
+
+Since we now have this very managable duration dependent distribution, we can easily obtain a predictive model for the waiting time. We simply compute the expectation value of the distribution, which depends logistically on the duration. This is the very first predictive model we use as can be seen in Appendix~\ref{sec:models}.
+

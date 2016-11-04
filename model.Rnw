@@ -1,0 +1,95 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+\section{Model Framework}
+
+We had a look at four different models and compared their predictions to the official predictive model. For that we set up our own loss function as depicted in Figure~\ref{fig:loss} on page~\pageref{fig:loss}. The procedure to determine its parameter can be found in Appendix~\ref{sec:loss}. The four investigated models are:
+\vspace{-0.5ex}
+\begin{enumerate}
+\setlength{\itemsep}{-0.5ex}
+\item A logistical interpolation of the two clouds shown in Figure~\ref{fig:cluster} (left).
+\item A piecewise linear regression separating the two duration clouds.
+\item A linear regression taking the duration as well as the last waiting time into account.
+\item A piecewise linear regression separating the three clouds in Figure~\ref{fig:cluster} taking the duration and the last waiting time into account.
+\end{enumerate}
+
+The exact implementations of the fitting algorithm and the models is described in Appendix~\ref{sec:implementation} and~\ref{sec:models}. We also used cross validation to determine the predcitive total loss of our models (c.f.\ Appendix~\ref{sec:implementation}). The results can be found in Table~\ref{tab:model_summary}. The residuals of each of the models together with their fitted parameters are stated in Appendix~\ref{sec:models}.
+
+<<pred_table_setup>>=
+opredh <- function(x,p) {
+  opred(x)
+}
+oloss <- round(sum(loss(g$waiting[-1] - opred(g$duration[-l]),q)),2)
+omisses <- round(avmisses(fn=opredh, x = data.frame(d = g$duration[-l]), 
+                    y = g$waiting[-1])*100,2)
+owait <- avwait(fn=opredh, x = data.frame(d = g$duration[-l]),
+                      y = g$waiting[-1])
+plm1.misses <- avmisses(fn=plm1.dur, 
+                              x = data.frame(d = g$duration[-l]), 
+                              y = g$waiting[-1], p = plm1.p1)*100
+plm1.wait <- avwait(fn=plm1.dur, 
+                              x = data.frame(d = g$duration[-l]), 
+                              y = g$waiting[-1], p = plm1.p1)
+log1.misses <- avmisses(fn=log1.wait, 
+                              x = data.frame(d = g$duration[-l]), 
+                              y = g$waiting[-1], p = log1.p1)*100
+log1.wait <- avwait(fn=log1.wait, 
+                              x = data.frame(d = g$duration[-l]), 
+                              y = g$waiting[-1], p = log1.p1)
+lm1.misses <- avmisses(fn=lm1.durwait, 
+                              x = data.frame(d = g$duration[-l],
+                                             w = g$waiting[-l]), 
+                              y = g$waiting[-1], p = lm1.p1)*100
+lm1.wait <- avwait(fn=lm1.durwait, 
+                              x = data.frame(d = g$duration[-l],
+                                             w = g$waiting[-l]), 
+                              y = g$waiting[-1], p = lm1.p1)
+plm2.misses <- avmisses(fn=plm2.durwait, 
+                              x = data.frame(d = g$duration[-l],
+                                             w = g$waiting[-l]), 
+                              y = g$waiting[-1], p = plm2.p1)*100
+plm2.wait <- avwait(fn=plm2.durwait, 
+                              x = data.frame(d = g$duration[-l],
+                                             w = g$waiting[-l]), 
+                              y = g$waiting[-1], p = plm2.p1)
+@
+\begin{table}[htbp]
+\centering
+\sisetup{
+  table-number-alignment = right,
+  table-figures-integer = 4,
+  table-figures-decimal = 2
+}
+\begin{tabular}
+{r
+S
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]
+S[table-auto-round]}
+\toprule
+& {Number of}& {Fitted} & {Predictive} & {Average} & {Average}\\
+& {Param} & {Total Loss} & {Total Loss} & {Misses} & {Additional Wait}\\
+& & & & {[\%]} & {[\si{\minute}]}\\
+\midrule
+Official & 2&\Sexpr{oloss}& \Sexpr{oloss} & \Sexpr{omisses}&\Sexpr{owait}\\
+\midrule
+Logistic Interpolation & \Sexpr{length(log1.p1)} 
+  & \Sexpr{log1.opt$value} & \Sexpr{log1.cv}
+  & \Sexpr{log1.misses} & \Sexpr{log1.wait}\\
+Pw Linear (dur) & \Sexpr{length(plm1.p1)} 
+  & \Sexpr{plm1.opt$value} & \Sexpr{plm1.cv} & \Sexpr{plm1.misses} 
+  & \Sexpr{plm1.wait}\\
+Linear (dur+wait) & \Sexpr{length(lm1.p1)}
+  & \Sexpr{lm1.opt$value} & \Sexpr{lm1.cv}
+  & \Sexpr{lm1.misses} & \Sexpr{lm1.wait}\\
+Pw Linear (dur+wait) & \Sexpr{length(plm2.p1)}
+  & \Sexpr{plm2.opt$value} & \Sexpr{plm2.cv}
+  & \Sexpr{plm2.misses} & \Sexpr{plm2.wait}\\
+\bottomrule
+\end{tabular}
+\caption{Summary of the models}
+\label{tab:model_summary}
+\end{table}
+
+\section{Conclusion}
+In conclusion we see that differentiating between the different clusters strongly improves the models. Model 3 (the only one not using clusters) can be discarded immediately. Its predictive total loss is by far the worst, because of the lack of used structure. The last model has the best predictive loss and smallest average waiting time, however the average miss ratio is slightly worse than for the other two. Together with the high amount of parameters necessary I would advise against its use. Perhaps in a later analysis one could consider a piecewise linear model with duration and waiting time as predictors, but only taking the duration separation into account. This would reduce the number of parameters to 6. As a standard choice I would recommend Model 1 as it has the best predictive behaviour, if the additional waiting time is of grave importance one could consider switching to Model 2, although the improvement is nigh negligible.

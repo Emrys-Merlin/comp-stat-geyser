@@ -1,0 +1,52 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+\section{The loss function}
+\label{sec:loss}
+
+In order to achieve our goal to find a suitable model to predict the waiting time of the faithful geyser, we need to work with an appropriate loss function. 
+
+The standard loss function (i.e.\ minimizing over the quadratic error) does not seem to be a permissible candidate. A good model should take into account that it is far less annoying for a visitor to wait a couple of minutes at the geyser before the eruption starts than being a few minutes too late. Because of the symmetry of the quadratic error, it cannot distinguish between 'being too early' and 'being late'. 
+
+Thus we will use the following loss function
+<<eval=FALSE, echo=TRUE>>=
+<<loss_function>>
+@
+with parameter $q$.
+
+As can be be seen in Figure~\ref{fig:loss}, the function attributes a constant high loss, if the prediction is too long and a linear gain of loss, if the predicted waiting time is shorter than the actual waiting time. This fullfills the requirement that a missed eruption weighs heavier than additional waiting time.
+
+\begin{figure}[htbp]
+\setkeys{Gin}{width=0.45\textwidth}
+\centering
+<<plot_loss,fig=TRUE>>=
+xrange <- seq(-10, 10, 0.05)
+plot(x = xrange, y = loss(xrange, q), type="l", 
+     xlab="time [min]", ylab="Loss")
+@
+\caption{Proposed loss function. Positive time corresponds to a shorter predicted waiting time than the actual waiting time.}
+\label{fig:loss}
+\end{figure}
+
+The last necessary step is to determine the parameter of this function. At first glance it seems that there are two: The slope of the linear part and the intercept of the constant part. However scaling the function by a (postive) factor does not change the result of a minimization. So we are free to fix the slope to 1 and are left with only the intercept as parameter. In order to determine it, we use the official predictive function of the National Park (as mentioned in~\cite{pred}, c.f.\ Equation~\eqref{eq:opred} on page~\pageref{eq:opred}).
+
+The procedure to determine our parameter $q$ now consists in the following idea: If we have the right $q$ and we fit a linear model using this loss function we want to get the official park function. This idea is sensible, as we can assume that there certainly was a bit of optimization (and rounding) involved in the determination of the park function and we thus can make sure that we roughly apply the same error margin as the park.
+
+Therefore the (manually) applied algorithm consists in systematically choosing different values for $q$ and then fitting a linear model. Aftewards we check the intercept and slope. If both are \enquote{close enough} to 30 respectively 10, we found our parameter.
+
+The fitting procedure used is described in Appendix~\ref{sec:implementation}. To make sure that we end up in the right local minimum, we choose 30 and 10 as the inital parameters for the fit of the linear model.
+
+<<q_estimation>>=
+dur <- function(x, p) {
+  p[1] + p[2]*x
+}
+dur.min <- function(x,y,q,p) {
+ sum(loss(y - dur(x,p),q))
+}
+p0 <- c(30, 10)
+dur.opt <- optim(p0, dur.min, x=g$duration[-l], y=g$waiting[-1], q=57)
+@
+
+For $q = \Sexpr{q}$ we yield fit parameters \Sexpr{round(dur.opt$par[1],2)} and \Sexpr{round(dur.opt$par[2],2)}. We also see that the models are rather robust with respect to small changes in $q$. So $q = \Sexpr{q}$ seems an acceptable choice. $q$ lies in a sensible region, too. A short sanity check: With that choice it is as bad to miss an eruption (and thus having to wait another average waiting time) as it is bad to have to wait another average waiting time (c.f.\ Table~\ref{tab:summary} on page~\pageref{tab:summary}) to the next eruption after the predictive model said it should be. This sounds reasonable.
+
+With this we get the total loss of the predictive park function as \Sexpr{round(sum(loss(g$waiting[-1] - opred(g$duration[-l]),q)),2)}. This is from now on our margin to top for alternative models.

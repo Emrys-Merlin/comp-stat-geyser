@@ -1,0 +1,37 @@
+%!Rnw root = Geyser-Analysis.Rnw
+%!TeX root = Geyser-Analysis.Rnw
+
+\section{Introduction}
+\label{sec:introduction}
+
+In this report we want to analyse the eruptions of the Old Faithful Geyser. This is a geyser at the Yellowstone National Park, which is known for its predictability, hence the name 'faithful'.
+
+We will use the data used by Azzalini \& Bowman \cite{data}, which was measured from August 1, 1985 to August 15, 1985. The measurements were taken manually an example page of the notes can be found in \cite[2]{data}. 
+
+The data set consists of two variables with overall \Sexpr{l} measurements. The types of the variables can be found in Table~\ref{tab:str}. For details please consult Appendix~\ref{sec:summary}. 
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{rrrr}
+    \toprule
+    Variable & Name & Type & Comment\\
+    \midrule
+    1 & duration & numeric & Eruption duration in \si{\minute}\\
+    2 & waiting & numeric & Waiting time since last \\
+    & & & eruption in \si{\minute}\\
+    \bottomrule
+  \end{tabular}
+  \caption{Structure of the geyser data set}
+  \label{tab:str}
+\end{table}
+
+From the handwritten notes, we take that not all duration measurements were done thoroughly at night times only a classification was given (\enquote{short}, \enquote{medium}, \enquote{long}). Azzalini \& Bowman chose to translate those to \SI{2}{\minute}, \SI{3}{\minute} and \SI{4}{\minute}. In this analysis we use an implementation of the geyser data set which is given by the R framwork. Explicitely we use \Sexpr{version$version.string} on a \Sexpr{gsub("_","-", version$platform)} machine and the geyser data set given by the \texttt{MASS} library (Version \Sexpr{packageDescription("MASS")$Version}). In this implementation the translation is already incorporated. Figure~\ref{fig:cluster} shows lines at the appropriate durations. We chose to leave the data points in as they do not seem to influence the overall shape of the distribution that much. Additionally we do not want to describe the data set perfectly, but merely want a predictive model. 
+
+As stated, in this analysis the main focus will lie on the task of finding a suitable predictive model for the waiting time until the next eruption. Before 1998 the waiting time was predicted using a linear model only taking the last eruption duration into account. According to Cook \& Weisberg \cite{pred} this function is given by
+\begin{align}
+\text{(next waiting time [min])} = 30 + 10 \cdot \text{(duration [min])}.
+\label{eq:opred}
+\end{align}
+This graph can be found in Figure~\ref{fig:cluster} (left, violet line) and we can use it to determine the requirements for our predictive model. The central one is, that we do not so much want to describe the data set perfectly, but instead focus on minimzing the number of missed eruptions while on the same time trying to have a bearable additional waiting time if our model predicts \enquote{too short}.
+
+To achieve this goal we will analyse the shape of the data and propose a proper framework for our model to translate our requirements into statistics.
