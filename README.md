@@ -1,4 +1,4 @@
-Data analysis of the \Geyser\ data set
+Data analysis of the *Geyser* data set
 =========================================
 
 This repository contains the handed in version of an end of term
